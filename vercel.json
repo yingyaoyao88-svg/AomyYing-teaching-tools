@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "name": "english-practice-app",
+  "buildCommand": "",
+  "outputDirectory": ".",
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    }
+  ]
+}

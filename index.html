@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>英语练习小工具</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Inter+Tight:wght@600;700;800&display=swap');
+body{font-family:'DM Sans',sans-serif;background:#F0EBD8;display:flex;justify-content:center;align-items:center;min-height:100vh;-webkit-tap-highlight-color:transparent;user-select:none}
+.app{width:390px;height:844px;background:#F9F4DF;border-radius:40px;overflow:hidden;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+@media(max-width:420px){.app{width:100%;height:100vh;border-radius:0}}
+.screen{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s}
+.screen::-webkit-scrollbar{display:none}
+.hr{transform:translateX(100%);opacity:0;pointer-events:none}
+.hl{transform:translateX(-30%);opacity:0;pointer-events:none}
+
+.sb{display:flex;justify-content:space-between;align-items:center;padding:22px 24px 0;height:62px;flex-shrink:0;font-family:Inter,sans-serif}
+.sb .tm{font-size:15px;font-weight:600;color:#1A1A23}
+.tn{display:flex;justify-content:space-between;align-items:center;padding:8px 20px;flex-shrink:0}
+.nb{width:40px;height:40px;border-radius:20px;background:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.nb:active{background:#f0f0f0}
+.nt{font-family:'Inter Tight',sans-serif;font-size:17px;font-weight:600;color:#1A1A23}
+.ct{padding:8px 20px 90px;display:flex;flex-direction:column;gap:14px;flex:1}
+
+.gr{display:flex;justify-content:space-between;align-items:center}
+.grh{font-family:'Inter Tight',sans-serif;font-size:24px;font-weight:700;color:#1A1A23}
+.grs{font-size:14px;color:#888;margin-top:4px}
+.av{width:48px;height:48px;border-radius:24px;background:#B9FF66;display:flex;align-items:center;justify-content:center;font-family:'Inter Tight',sans-serif;font-size:20px;font-weight:700;color:#1A1A23}
+
+.card{background:#fff;border-radius:24px;box-shadow:0 4px 20px rgba(10,10,15,.05)}
+.goal-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:18px 18px 0}
+.goal-t{font-family:'Inter Tight',sans-serif;font-size:16px;font-weight:600;color:#1A1A23}
+.goal-c{font-family:'Inter Tight',sans-serif;font-size:14px;font-weight:600;color:#5B57EB}
+.pb{width:calc(100% - 36px);height:10px;border-radius:5px;background:#F0EBD8;overflow:hidden;margin:0 18px 18px}
+.pf{height:100%;border-radius:5px;background:#B9FF66;transition:width .5s}
+
+.st{font-family:'Inter Tight',sans-serif;font-size:18px;font-weight:700;color:#1A1A23;margin-top:4px}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mtile{background:#fff;border-radius:20px;padding:18px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 2px 12px rgba(10,10,15,.04);cursor:pointer;transition:transform .15s;border:none;text-align:left;width:100%}
+.mtile:active{transform:scale(.97)}
+.mi{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.ml{font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:600;color:#1A1A23}
+.ms{font-size:12px;color:#999}
+
+.sk{display:flex;align-items:center;gap:14px;background:#1A1A23;border-radius:20px;padding:18px}
+.ski{width:44px;height:44px;border-radius:14px;background:#B9FF66;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px}
+.skth{font-family:'Inter Tight',sans-serif;font-size:16px;font-weight:700;color:#fff}
+.sks{font-size:12px;color:#999}
+
+.tb{position:absolute;bottom:0;left:0;right:0;padding:12px 21px 21px;z-index:10}
+.tp{display:flex;background:#fff;border-radius:36px;border:1px solid #E6E0D4;padding:4px;box-shadow:0 4px 20px rgba(10,10,15,.08)}
+.ti{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:54px;border-radius:26px;cursor:pointer;border:none;background:transparent}
+.ti.ac{background:#1A1A23}
+.ti.ac .tl{color:#fff}
+.tl{font-size:10px;font-weight:600;color:#999}
+
+/* Selector */
+.sel-list{display:flex;flex-direction:column;gap:10px}
+.sel-item{background:#fff;border-radius:20px;padding:16px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 12px rgba(10,10,15,.04);cursor:pointer;transition:transform .15s;border:none;text-align:left;width:100%}
+.sel-item:active{transform:scale(.98)}
+.sel-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.sel-info{flex:1}
+.sel-name{font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:600;color:#1A1A23}
+.sel-desc{font-size:12px;color:#888;margin-top:2px}
+.sel-arrow{font-size:18px;color:#ccc}
+
+/* Flashcard */
+.ps{padding:0 20px 8px}
+.plab{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ptx{font-size:13px;font-weight:500;color:#888}
+.ppct{font-family:'Inter Tight',sans-serif;font-size:13px;font-weight:600;color:#1A1A23}
+.pbar{width:100%;height:8px;border-radius:4px;background:#F0EBD8;overflow:hidden}
+.pbf{height:100%;border-radius:4px;background:#B9FF66;transition:width .3s}
+.cs{padding:8px 20px 16px;display:flex;flex-direction:column;gap:14px;align-items:center}
+.wc{background:#fff;border-radius:28px;padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 8px 32px rgba(10,10,15,.08);width:100%;min-height:250px}
+.we{font-size:60px;text-align:center}
+.wbig{font-family:'Inter Tight',sans-serif;font-size:42px;font-weight:700;color:#1A1A23;text-align:center;word-break:break-all}
+.wcn{font-size:18px;font-weight:600;color:#1A1A23;text-align:center;background:#F0EBD8;padding:6px 14px;border-radius:20px}
+.wphon{font-size:14px;color:#5B57EB;display:flex;align-items:center;gap:6px;cursor:pointer}
+.fh{font-size:12px;color:#ccc;text-align:center}
+.acr{display:flex;justify-content:center;align-items:center;gap:16px;padding:4px 0}
+.abtn{width:60px;height:60px;border-radius:30px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+.abtn:active{transform:scale(.92)}
+.bu{background:#fff;box-shadow:0 4px 16px rgba(10,10,15,.1)}
+.bk{background:#B9FF66;box-shadow:0 6px 20px rgba(185,255,102,.4);width:68px;height:68px;border-radius:34px}
+.bf{background:#fff;box-shadow:0 4px 16px rgba(10,10,15,.1)}
+.bf.fvd{background:#FFD700}
+
+.spell-input{width:80%;border:2px solid #E6E0D4;border-radius:16px;padding:14px;font-size:22px;font-family:'Inter Tight',sans-serif;text-align:center;outline:none;background:#fff;transition:border-color .3s}
+.spell-input:focus{border-color:#B9FF66}
+.spell-input.ok{border-color:#B9FF66;background:#f6ffe6}
+.spell-input.err{border-color:#FF6B6B;background:#fff5f5}
+.spell-toggle{font-size:13px;color:#5B57EB;cursor:pointer;text-decoration:underline}
+
+/* Reading Dialog */
+.dialog-msg{max-width:80%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;position:relative}
+.dmsg-left{border-bottom-left-radius:4px;margin-right:auto}
+.dmsg-right{border-bottom-right-radius:4px;margin-left:auto}
+.dmsg-a{background:#F0EBD8;color:#1A1A23}
+.dmsg-b{background:#5B57EB;color:#fff}
+.dmsg-name{font-size:11px;font-weight:600;margin-bottom:4px}
+.dmsg-role{display:flex;align-items:center;gap:8px;margin:8px 0}
+.dmsg-emoji{font-size:28px}
+.dialog-area{display:flex;flex-direction:column;gap:8px;padding:8px 0;max-height:320px;overflow-y:auto}
+.reading-scene{background:linear-gradient(135deg,#F0EBD8,#fff);border-radius:20px;padding:16px;text-align:center;margin-bottom:4px;border:2px dashed #E6E0D4;transition:all .3s}
+.reading-scene .rs-emoji{font-size:52px;margin-bottom:6px}
+.reading-scene .rs-label{font-size:12px;font-weight:600;color:#5B57EB}
+.dialog-area::-webkit-scrollbar{display:none}
+.dialog-controls{display:flex;gap:8px;margin-top:12px}
+
+/* Phonics practice */
+.phonics-card{background:#fff;border-radius:20px;padding:16px;box-shadow:0 2px 12px rgba(10,10,15,.04)}
+.phonics-letter-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.phonics-big-letter{font-family:'Inter Tight',sans-serif;font-size:48px;font-weight:800;color:#1A1A23;cursor:pointer;transition:all .2s;padding:4px 12px;border-radius:16px;border:2px solid transparent;user-select:none}
+.phonics-big-letter:hover{border-color:#B9FF66;background:#f6ffe6}
+.phonics-big-letter:active{transform:scale(.95)}
+.phonics-sound{font-size:20px;color:#5B57EB;font-weight:600;cursor:pointer;transition:all .2s;padding:4px 8px;border-radius:10px}
+.phonics-sound:hover{background:#f0ecff}
+.phonics-sound:active{transform:scale(.95)}
+.phonics-pron-hint{font-size:11px;color:#ccc;margin-top:-4px;text-align:center}
+.phonics-word-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.phonics-word{background:#F0EBD8;border-radius:12px;padding:10px 6px;text-align:center;font-size:12px;font-weight:500;cursor:pointer;transition:transform .15s;border:none;width:100%}
+.phonics-word:active{transform:scale(.95);background:#B9FF66}
+.phonics-word .pw-emoji{font-size:24px;display:block}
+.phonics-word .pw-text{display:block;margin-top:4px}
+.practice-question{background:#fff;border-radius:16px;padding:16px;margin-top:12px;text-align:center}
+.pq-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.pq-opt{background:#F0EBD8;border-radius:12px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.pq-opt:active{transform:scale(.95)}
+.pq-opt.correct{background:#B9FF66}
+.pq-opt.wrong{background:#FF6B6B;color:#fff}
+
+/* Story */
+.story-list{display:flex;flex-direction:column;gap:10px}
+.story-card2{background:#fff;border-radius:20px;padding:14px;display:flex;gap:12px;box-shadow:0 2px 12px rgba(10,10,15,.04);cursor:pointer;transition:transform .15s;border:none;text-align:left;width:100%}
+.story-card2:active{transform:scale(.98)}
+.story-cover{width:64px;height:80px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0}
+.story-meta{flex:1;display:flex;flex-direction:column;gap:4px}
+.story-meta .smt{font-family:'Inter Tight',sans-serif;font-size:15px;font-weight:600;color:#1A1A23}
+.story-meta .smd{font-size:12px;color:#888}
+.story-page{background:#fff;border-radius:24px;padding:20px;text-align:center;box-shadow:0 4px 20px rgba(10,10,15,.06)}
+.story-page .sp-img{font-size:80px;margin-bottom:12px}
+.story-page .sp-sentence{font-size:18px;font-weight:600;color:#1A1A23;margin-bottom:8px;cursor:pointer;line-height:1.6;padding:12px;border-radius:14px;transition:all .3s;border:2px solid transparent}
+.story-page .sp-sentence.reading{border-color:#B9FF66;background:#f6ffe6;animation:pulse 1s ease-in-out}
+.story-page .sp-sentence.listened{border-color:#E6E0D4;background:#fafafa}
+.story-page .sp-cn{font-size:14px;color:#888}
+.story-page-nav{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.story-page-nav button{background:#fff;border:1.5px solid #E6E0D4;border-radius:50px;padding:8px 16px;font-size:13px;cursor:pointer}
+.story-controls{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;justify-content:center}
+.story-read-btn{background:#B9FF66;border:none;border-radius:50px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(185,255,102,.3);transition:all .2s}
+.story-read-btn:active{transform:scale(.96)}
+.story-read-btn.playing{background:#5B57EB;color:#fff;box-shadow:0 4px 14px rgba(91,87,235,.3)}
+.story-auto-btn{background:#fff;border:1.5px solid #5B57EB;border-radius:50px;padding:10px 16px;font-size:13px;font-weight:500;color:#5B57EB;cursor:pointer;display:flex;align-items:center;gap:4px}
+.story-auto-btn.active{background:#5B57EB;color:#fff}
+.story-record-status{font-size:12px;color:#FF6B6B;text-align:center;margin-top:4px;min-height:18px}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(185,255,102,0)}50%{box-shadow:0 0 0 8px rgba(185,255,102,.3)}}
+
+/* Results */
+.rc{padding:8px 20px 40px;display:flex;flex-direction:column;gap:16px;align-items:center}
+.cel{display:flex;flex-direction:column;align-items:center;gap:8px;padding-top:8px}
+.cc{width:72px;height:72px;border-radius:36px;background:#B9FF66;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(185,255,102,.4);animation:pop .5s cubic-bezier(.68,-.55,.27,1.55);font-size:36px}
+@keyframes pop{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+.dt{font-family:'Inter Tight',sans-serif;font-size:26px;font-weight:700;color:#1A1A23}
+.ds{font-size:14px;color:#888;text-align:center}
+
+.scd{background:#fff;border-radius:28px;padding:24px;width:100%;display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 6px 24px rgba(10,10,15,.06)}
+.sr{width:130px;height:130px;border-radius:65px;background:conic-gradient(#B9FF66 var(--s),#F0EBD8 0);display:flex;align-items:center;justify-content:center}
+.sri{width:110px;height:110px;border-radius:55px;background:#fff;display:flex;align-items:center;justify-content:center}
+.sp{font-family:'Inter Tight',sans-serif;font-size:34px;font-weight:700;color:#B9FF66}
+.sl{font-size:13px;font-weight:500;color:#888}
+.srow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%}
+.si2{background:#fff;border-radius:20px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 2px 12px rgba(10,10,15,.04)}
+.sv{font-family:'Inter Tight',sans-serif;font-size:24px;font-weight:700;color:#1A1A23}
+.sl2{font-size:12px;color:#888}
+.rh{display:flex;justify-content:space-between;align-items:center;width:100%}
+.rt2{font-family:'Inter Tight',sans-serif;font-size:17px;font-weight:700;color:#1A1A23}
+.rc2{font-size:13px;font-weight:500;color:#FF6B6B}
+.wl{width:100%;display:flex;flex-direction:column;gap:8px}
+.wi2{background:#fff;border-radius:16px;padding:12px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(10,10,15,.03);cursor:pointer}
+.wd{width:8px;height:8px;border-radius:4px;background:#FF6B6B;flex-shrink:0}
+.rbtn{display:flex;gap:12px;width:100%}
+.bo{flex:1;border:1.5px solid #1A1A23;background:#fff;color:#1A1A23;border-radius:50px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;text-align:center}
+.bs{flex:1;border:none;background:#1A1A23;color:#fff;border-radius:50px;padding:12px;font-size:15px;font-weight:600;cursor:pointer;text-align:center}
+.bo:active,.bs:active{opacity:.8}
+
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#1A1A23;color:#fff;padding:10px 24px;border-radius:50px;font-size:13px;font-weight:500;z-index:100;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:center;justify-content:center}
+.modal-box{background:#fff;border-radius:24px;padding:24px;width:300px;text-align:center}
+.modal-title{font-family:'Inter Tight',sans-serif;font-size:18px;font-weight:700;color:#1A1A23;margin-bottom:8px}
+.modal-msg{font-size:14px;color:#888;margin-bottom:20px;line-height:1.5}
+.modal-btns{display:flex;gap:10px}
+.modal-btns button{flex:1;border-radius:50px;padding:12px;font-size:14px;font-weight:600;cursor:pointer}
+.modal-cancel{border:1.5px solid #E0E0E0;background:#fff;color:#888}
+.modal-confirm{border:none;background:#FF6B6B;color:#fff}
+
+.phonics-level-select{display:flex;gap:8px;margin-bottom:12px}
+.pls-btn{flex:1;border:2px solid #E6E0D4;background:#fff;border-radius:16px;padding:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.pls-btn.active{background:#1A1A23;color:#fff;border-color:#1A1A23}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+<!-- ===== HOME ===== -->
+<div class="screen" id="screen-home">
+<div class="sb"><span class="tm">9:41</span><div style="display:flex;gap:6px;align-items:center">
+<svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1A1A23"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1A1A23"/><rect x="10" y="2" width="3" height="10" rx="1" fill="#1A1A23"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1A1A23"/></svg>
+<svg width="16" height="12" viewBox="0 0 16 12"><path d="M2 4.5C5.5 1.5 10.5 1.5 14 4.5" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 7C6.5 5.3 9.5 5.3 11.5 7" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="10" r="1.2" fill="#1A1A23"/></svg>
+<svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="#1A1A23" stroke-width="1"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="#1A1A23"/><rect x="22.5" y="3.5" width="2" height="5" rx="1" fill="#1A1A23"/></svg>
+</div></div>
+<div class="ct">
+<div style="display:flex;justify-content:space-between;align-items:center"><div><div class="grh">Hi, 小朋友</div><div class="grs">今天也要加油哦</div></div><div class="av">A</div></div>
+<div class="card"><div class="goal-h"><span class="goal-t">今日打卡进度</span><span class="goal-c" id="goal-count">0 / 4</span></div><div class="pb"><div class="pf" id="goal-progress" style="width:0%"></div></div></div>
+<div class="st">今日打卡</div>
+<div class="mgrid">
+<button class="mtile" data-go="word"><div class="mi" style="background:#B9FF66">📖</div><div class="ml">单词打卡</div><div class="ms">拼读+拼写 · Unit 1-6</div></button>
+<button class="mtile" data-go="reading"><div class="mi" style="background:#5B57EB">📚</div><div class="ml">阅读打卡</div><div class="ms">Let's talk 对话 · 12篇</div></button>
+<button class="mtile" data-go="phonics"><div class="mi" style="background:#F8B7B8">🔤</div><div class="ml">自然拼读打卡</div><div class="ms">牛津拼读 1-3级</div></button>
+<button class="mtile" data-go="story"><div class="mi" style="background:#F8D044">🎧</div><div class="ml">小故事磨耳朵</div><div class="ms">绘本跟读 · 8篇</div></button>
+</div>
+<div class="sk"><div class="ski">🔥</div><div><div class="skth" id="streak-title">连续打卡 0 天</div><div class="sks" id="streak-sub">完成今日4项打卡领取⭐</div></div></div>
+</div>
+<div class="tb"><div class="tp">
+<button class="ti ac"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M3 12L12 4L21 12V20H16V14H8V20H3V12Z" stroke="#1A1A23" stroke-width="2" stroke-linejoin="round"/></svg><span class="tl">首页</span></button>
+<button class="ti"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M5 20V14M12 20V8M19 20V4" stroke="#999" stroke-width="2.5" stroke-linecap="round"/></svg><span class="tl">统计</span></button>
+<button class="ti"><svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke="#999" stroke-width="2"/><path d="M4 21C4 16 8 14 12 14C16 14 20 16 20 21" stroke="#999" stroke-width="2" stroke-linecap="round"/></svg><span class="tl">我的</span></button>
+</div></div>
+</div>
+
+<!-- ===== WORD UNIT SELECT ===== -->
+<div class="screen hr" id="screen-word-select">
+<div class="sb"><span class="tm">9:41</span><div style="display:flex;gap:6px"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1A1A23"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1A1A23"/><rect x="10" y="2" width="3" height="10" rx="1" fill="#1A1A23"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1A1A23"/></svg><svg width="16" height="12" viewBox="0 0 16 12"><path d="M2 4.5C5.5 1.5 10.5 1.5 14 4.5" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 7C6.5 5.3 9.5 5.3 11.5 7" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="10" r="1.2" fill="#1A1A23"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="#1A1A23" stroke-width="1"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="#1A1A23"/><rect x="22.5" y="3.5" width="2" height="5" rx="1" fill="#1A1A23"/></svg></div></div>
+<div class="tn"><button class="nb" id="ws-back"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 5L8 12L15 19" stroke="#1A1A23" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="nt">单词打卡 · 选择单元</span><span style="width:40px"></span></div>
+<div class="ct" id="word-unit-list"></div>
+</div>
+
+<!-- ===== WORD FLASHCARD ===== -->
+<div class="screen hr" id="screen-word">
+<div class="sb"><span class="tm">9:41</span><div style="display:flex;gap:6px"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1A1A23"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1A1A23"/><rect x="10" y="2" width="3" height="10" rx="1" fill="#1A1A23"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1A1A23"/></svg><svg width="16" height="12" viewBox="0 0 16 12"><path d="M2 4.5C5.5 1.5 10.5 1.5 14 4.5" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 7C6.5 5.3 9.5 5.3 11.5 7" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="10" r="1.2" fill="#1A1A23"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="#1A1A23" stroke-width="1"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="#1A1A23"/><rect x="22.5" y="3.5" width="2" height="5" rx="1" fill="#1A1A23"/></svg></div></div>
+<div class="tn"><button class="nb" id="w-back"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 5L8 12L15 19" stroke="#1A1A23" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="nt" id="w-title">单词打卡</span><button class="nb" id="w-close"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 6L18 18M6 18L18 6" stroke="#1A1A23" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>
+<div class="ps"><div class="plab"><span class="ptx" id="w-progress">第 1 个 / 共 0 个</span><span class="ppct" id="w-percent">0%</span></div><div class="pbar"><div class="pbf" id="w-bar" style="width:0%"></div></div></div>
+<div class="cs">
+<div class="wc"><div class="we" id="w-emoji">📖</div><div class="wbig" id="w-big">apple</div><div class="wcn" id="w-cn">苹果</div><div class="wphon" id="w-phon"><span>🔊</span><span id="w-phon-text">/ˈæp(ə)l/</span></div></div>
+<div class="fh">点击 🔊 听发音 | 下滑输入拼写</div>
+<div id="w-spell-sec" style="width:100%;display:flex;flex-direction:column;align-items:center;gap:8px">
+<input class="spell-input" id="w-spell-input" placeholder="输入英文单词..." autocomplete="off" autocapitalize="off" spellcheck="false">
+<div style="display:flex;gap:8px">
+<button class="bo" id="w-spell-check" style="width:auto;padding:8px 16px;font-size:13px">✓ 检查</button>
+<button class="bo" id="w-show-answer" style="width:auto;padding:8px 16px;font-size:13px;border-color:#5B57EB;color:#5B57EB">👁 显示</button>
+</div>
+<div id="w-spell-result" style="font-size:14px;font-weight:600;min-height:20px"></div>
+</div>
+<div class="acr">
+<button class="abtn bu" id="w-unknown"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M6 6L18 18M6 18L18 6" stroke="#FF6B6B" stroke-width="2.5" stroke-linecap="round"/></svg></button>
+<button class="abtn bk" id="w-known"><svg width="28" height="28" viewBox="0 0 24 24"><path d="M5 12L10 17L19 7" stroke="#1A1A23" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+<button class="abtn bf" id="w-fav"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 3L14.5 9L21 10L16 15L17.5 21L12 18L6.5 21L8 15L3 10L9.5 9L12 3Z" stroke="#1A1A23" stroke-width="2" stroke-linejoin="round"/></svg></button>
+</div>
+</div>
+</div>
+
+<!-- ===== READING UNIT SELECT ===== -->
+<div class="screen hr" id="screen-reading-select">
+<div class="sb"><span class="tm">9:41</span><div style="display:flex;gap:6px"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1A1A23"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1A1A23"/><rect x="10" y="2" width="3" height="10" rx="1" fill="#1A1A23"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1A1A23"/></svg><svg width="16" height="12" viewBox="0 0 16 12"><path d="M2 4.5C5.5 1.5 10.5 1.5 14 4.5" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 7C6.5 5.3 9.5 5.3 11.5 7" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="10" r="1.2" fill="#1A1A23"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="#1A1A23" stroke-width="1"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="#1A1A23"/><rect x="22.5" y="3.5" width="2" height="5" rx="1" fill="#1A1A23"/></svg></div></div>
+<div class="tn"><button class="nb" id="rs-back"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 5L8 12L15 19" stroke="#1A1A23" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="nt">阅读打卡 · 选择单元</span><span style="width:40px"></span></div>
+<div class="ct" id="reading-unit-list"></div>
+</div>
+
+<!-- ===== READING DIALOG ===== -->
+<div class="screen hr" id="screen-reading">
+<div class="sb"><span class="tm">9:41</span><div style="display:flex;gap:6px"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1A1A23"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1A1A23"/><rect x="10" y="2" width="3" height="10" rx="1" fill="#1A1A23"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1A1A23"/></svg><svg width="16" height="12" viewBox="0 0 16 12"><path d="M2 4.5C5.5 1.5 10.5 1.5 14 4.5" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 7C6.5 5.3 9.5 5.3 11.5 7" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="10" r="1.2" fill="#1A1A23"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="#1A1A23" stroke-width="1"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="#1A1A23"/><rect x="22.5" y="3.5" width="2" height="5" rx="1" fill="#1A1A23"/></svg></div></div>
+<div class="tn"><button class="nb" id="r-back"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 5L8 12L15 19" stroke="#1A1A23" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="nt" id="r-title">阅读打卡</span><button class="nb" id="r-close"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 6L18 18M6 18L18 6" stroke="#1A1A23" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>
+<div class="ps"><div class="plab"><span class="ptx" id="r-progress"></span><span class="ppct" id="r-percent">0%</span></div><div class="pbar"><div class="pbf" id="r-bar" style="width:0%"></div></div></div>
+<div class="cs">
+<div class="reading-scene" id="reading-scene"><div class="rs-emoji">👫</div><div class="rs-label">Let's talk A · 课本场景</div></div>
+<div class="dialog-area" id="dialog-area"></div>
+<div class="dialog-controls"><button class="bs" id="r-next-msg" style="width:100%">继续对话 →</button></div>
+</div>
+</div>
+
+<!-- ===== PHONICS ===== -->
+<div class="screen hr" id="screen-phonics">
+<div class="sb"><span class="tm">9:41</span><div style="display:flex;gap:6px"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1A1A23"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1A1A23"/><rect x="10" y="2" width="3" height="10" rx="1" fill="#1A1A23"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1A1A23"/></svg><svg width="16" height="12" viewBox="0 0 16 12"><path d="M2 4.5C5.5 1.5 10.5 1.5 14 4.5" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 7C6.5 5.3 9.5 5.3 11.5 7" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="10" r="1.2" fill="#1A1A23"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="#1A1A23" stroke-width="1"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="#1A1A23"/><rect x="22.5" y="3.5" width="2" height="5" rx="1" fill="#1A1A23"/></svg></div></div>
+<div class="tn"><button class="nb" id="p-back"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 5L8 12L15 19" stroke="#1A1A23" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="nt">自然拼读打卡</span><button class="nb" id="p-close"><svg width="16" height="16" viewBox="0 0 24 24"><path d="M6 6L18 18M6 18L18 6" stroke="#1A1A23" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>
+<div class="ps"><div class="plab"><span class="ptx" id="p-progress">第 1 个 / 共 0 个</span><span class="ppct" id="p-percent">0%</span></div><div class="pbar"><div class="pbf" id="p-bar" style="width:0%"></div></div></div>
+<div class="cs">
+<div class="phonics-level-select"><button class="pls-btn active" data-pl="1">Level 1 字母音</button><button class="pls-btn" data-pl="2">Level 2 短元音</button><button class="pls-btn" data-pl="3">Level 3 长元音</button></div>
+<div class="phonics-card">
+<div class="phonics-letter-row"><div class="phonics-big-letter" id="p-letter" title="点击听读音">Aa</div><div class="phonics-sound" id="p-sound" title="点击听发音">/æ/</div><div style="flex:1"></div></div>
+<div class="phonics-pron-hint" id="p-hint">👆 点击字母或音标听发音</div>
+<div class="phonics-word-grid" id="p-words"></div>
+</div>
+<div class="practice-question" id="pq-box" style="display:none"></div>
+<div class="acr">
+<button class="abtn bu" id="p-prev" style="width:auto;padding:0 18px;font-size:13px">← 上一个</button>
+<button class="abtn bk" id="p-next" style="width:auto;padding:0 18px;font-size:13px;color:#1A1A23;font-weight:600">下一个 →</button>
+</div>
+</div>
+</div>
+
+<!-- ===== STORY ===== -->
+<div class="screen hr" id="screen-story">
+<div class="sb"><span class="tm">9:41</span><div style="display:flex;gap:6px"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1A1A23"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1A1A23"/><rect x="10" y="2" width="3" height="10" rx="1" fill="#1A1A23"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1A1A23"/></svg><svg width="16" height="12" viewBox="0 0 16 12"><path d="M2 4.5C5.5 1.5 10.5 1.5 14 4.5" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 7C6.5 5.3 9.5 5.3 11.5 7" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="10" r="1.2" fill="#1A1A23"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="#1A1A23" stroke-width="1"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="#1A1A23"/><rect x="22.5" y="3.5" width="2" height="5" rx="1" fill="#1A1A23"/></svg></div></div>
+<div class="tn"><button class="nb" id="s-back"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 5L8 12L15 19" stroke="#1A1A23" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="nt">小故事磨耳朵</span><span style="width:40px"></span></div>
+<div class="ct" id="story-list-s"></div>
+</div>
+
+<!-- ===== STORY READER ===== -->
+<div class="screen hr" id="screen-story-reader">
+<div class="sb"><span class="tm">9:41</span><div style="display:flex;gap:6px"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1A1A23"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1A1A23"/><rect x="10" y="2" width="3" height="10" rx="1" fill="#1A1A23"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1A1A23"/></svg><svg width="16" height="12" viewBox="0 0 16 12"><path d="M2 4.5C5.5 1.5 10.5 1.5 14 4.5" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 7C6.5 5.3 9.5 5.3 11.5 7" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="10" r="1.2" fill="#1A1A23"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="#1A1A23" stroke-width="1"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="#1A1A23"/><rect x="22.5" y="3.5" width="2" height="5" rx="1" fill="#1A1A23"/></svg></div></div>
+<div class="tn"><button class="nb" id="sr-back"><svg width="18" height="18" viewBox="0 0 24 24"><path d="M15 5L8 12L15 19" stroke="#1A1A23" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button><span class="nt" id="sr-title">绘本阅读</span><span style="width:40px"></span></div>
+<div class="cs">
+<div class="story-page" id="story-page">
+<div class="sp-img" id="sp-img">🐱</div>
+<div class="sp-sentence" id="sp-sentence">The big cat.</div>
+<div class="sp-cn" id="sp-cn">大猫</div>
+<div class="story-controls">
+<button class="story-read-btn" id="sp-readalong">🔊 跟读模式</button>
+<button class="story-auto-btn" id="sp-autoplay">▶ 自动播放</button>
+</div>
+<div class="story-record-status" id="sp-status"></div>
+</div>
+<div class="story-page-nav">
+<button id="sp-prev">← 上一页</button>
+<span style="font-size:13px;color:#888" id="sp-page-num">1/8</span>
+<button id="sp-next">下一页 →</button>
+</div>
+</div>
+</div>
+
+<!-- ===== RESULTS ===== -->
+<div class="screen hr" id="screen-results">
+<div class="sb"><span class="tm">9:41</span><div style="display:flex;gap:6px"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#1A1A23"/><rect x="5" y="5" width="3" height="7" rx="1" fill="#1A1A23"/><rect x="10" y="2" width="3" height="10" rx="1" fill="#1A1A23"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#1A1A23"/></svg><svg width="16" height="12" viewBox="0 0 16 12"><path d="M2 4.5C5.5 1.5 10.5 1.5 14 4.5" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><path d="M4.5 7C6.5 5.3 9.5 5.3 11.5 7" stroke="#1A1A23" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="10" r="1.2" fill="#1A1A23"/></svg><svg width="25" height="12" viewBox="0 0 25 12"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="#1A1A23" stroke-width="1"/><rect x="2" y="2" width="17" height="8" rx="1.5" fill="#1A1A23"/><rect x="22.5" y="3.5" width="2" height="5" rx="1" fill="#1A1A23"/></svg></div></div>
+<div class="rc"><div class="cel"><div class="cc">✅</div><div class="dt">打卡完成！</div><div class="ds">太棒了，今天的练习都搞定啦</div></div>
+<div class="scd"><div class="sr" id="sr-ring" style="--s:0%"><div class="sri"><span class="sp" id="sr-pct">0%</span></div></div><span class="sl">正确率</span></div>
+<div class="srow"><div class="si2"><span class="sv" id="sr-correct">0</span><span class="sl2">正确题数</span></div><div class="si2"><span class="sv" id="sr-time">0</span><span class="sl2">用时(秒)</span></div><div class="si2"><span class="sv" id="sr-streak">0</span><span class="sl2">连续天数</span></div></div>
+<div class="rh"><span class="rt2">错题回顾</span><span class="rc2" id="sr-review">0 个</span></div>
+<div class="wl" id="sr-wrong"></div>
+<div class="rbtn"><button class="bo" id="sr-retry">重练错题</button><button class="bs" id="sr-continue">继续打卡</button></div>
+</div>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="modal" style="display:none">
+<div class="modal-box"><div class="modal-title" id="modal-title"></div><div class="modal-msg" id="modal-msg"></div>
+<div class="modal-btns"><button class="modal-cancel" id="modal-cancel">取消</button><button class="modal-confirm" id="modal-confirm">确定</button></div></div></div>
+
+<script>
+// ============ DATA ============
+const vocab={units:[
+{unit:1,title:"Making friends",cn:"交朋友",color:"#B9FF66",emoji:"👫",words:[
+{en:"nice",phon:"/naɪs/",cn:"友好的",emoji:"😊"},{en:"ear",phon:"/ɪə(r)/",cn:"耳朵",emoji:"👂"},{en:"hand",phon:"/hænd/",cn:"手",emoji:"🤚"},{en:"eye",phon:"/aɪ/",cn:"眼睛",emoji:"👁"},{en:"mouth",phon:"/maʊθ/",cn:"嘴巴",emoji:"👄"},{en:"arm",phon:"/ɑːm/",cn:"胳膊",emoji:"💪"},{en:"can",phon:"/kæn/",cn:"可以",emoji:"✅"},{en:"share",phon:"/ʃeə(r)/",cn:"分享",emoji:"🤝"},{en:"smile",phon:"/smaɪl/",cn:"微笑",emoji:"🙂"},{en:"listen",phon:"/ˈlɪs(ə)n/",cn:"倾听",emoji:"👂"},{en:"help",phon:"/help/",cn:"帮助",emoji:"🆘"},{en:"say",phon:"/seɪ/",cn:"说",emoji:"💬"},{en:"goodbye",phon:"/ˌɡʊdˈbaɪ/",cn:"再见",emoji:"👋"},{en:"toy",phon:"/tɔɪ/",cn:"玩具",emoji:"🧸"},{en:"friend",phon:"/frend/",cn:"朋友",emoji:"👫"},{en:"good",phon:"/ɡʊd/",cn:"好的",emoji:"👍"}
+]},{unit:2,title:"Different families",cn:"不同的家庭",color:"#5B57EB",emoji:"👨‍👩‍👧‍👦",words:[
+{en:"mum",phon:"/mʌm/",cn:"妈妈",emoji:"👩"},{en:"dad",phon:"/dæd/",cn:"爸爸",emoji:"👨"},{en:"grandma",phon:"/ˈɡrænmɑː/",cn:"奶奶",emoji:"👵"},{en:"grandpa",phon:"/ˈɡrænpɑː/",cn:"爷爷",emoji:"👴"},{en:"mother",phon:"/ˈmʌðə(r)/",cn:"母亲",emoji:"🤱"},{en:"father",phon:"/ˈfɑːðə(r)/",cn:"父亲",emoji:"👔"},{en:"me",phon:"/miː/",cn:"我",emoji:"🙋"},{en:"sister",phon:"/ˈsɪstə(r)/",cn:"姐妹",emoji:"👧"},{en:"family",phon:"/ˈfæməli/",cn:"家庭",emoji:"👨‍👩‍👧‍👦"},{en:"have",phon:"/hæv/",cn:"有",emoji:"✋"},{en:"big",phon:"/bɪɡ/",cn:"大的",emoji:"🏠"},{en:"brother",phon:"/ˈbrʌðə(r)/",cn:"兄弟",emoji:"👦"},{en:"baby",phon:"/ˈbeɪbi/",cn:"婴儿",emoji:"👶"},{en:"some",phon:"/sʌm/",cn:"一些",emoji:"👥"},{en:"small",phon:"/smɔːl/",cn:"小的",emoji:"🐣"}
+]},{unit:3,title:"Amazing animals",cn:"神奇的动物",color:"#F8B7B8",emoji:"🐘",words:[
+{en:"dog",phon:"/dɒɡ/",cn:"狗",emoji:"🐕"},{en:"pet",phon:"/pet/",cn:"宠物",emoji:"🐾"},{en:"cat",phon:"/kæt/",cn:"猫",emoji:"🐱"},{en:"fish",phon:"/fɪʃ/",cn:"鱼",emoji:"🐟"},{en:"bird",phon:"/bɜːd/",cn:"鸟",emoji:"🐦"},{en:"rabbit",phon:"/ˈræbɪt/",cn:"兔",emoji:"🐰"},{en:"zoo",phon:"/zuː/",cn:"动物园",emoji:"🏛"},{en:"fox",phon:"/fɒks/",cn:"狐狸",emoji:"🦊"},{en:"panda",phon:"/ˈpændə/",cn:"熊猫",emoji:"🐼"},{en:"monkey",phon:"/ˈmʌŋki/",cn:"猴子",emoji:"🐵"},{en:"tiger",phon:"/ˈtaɪɡə(r)/",cn:"老虎",emoji:"🐯"},{en:"elephant",phon:"/ˈelɪfənt/",cn:"大象",emoji:"🐘"},{en:"lion",phon:"/ˈlaɪən/",cn:"狮子",emoji:"🦁"},{en:"giraffe",phon:"/dʒɪˈrɑːf/",cn:"长颈鹿",emoji:"🦒"},{en:"tall",phon:"/tɔːl/",cn:"高的",emoji:"📏"},{en:"fast",phon:"/fɑːst/",cn:"快的",emoji:"⚡"}
+]},{unit:4,title:"Plants around us",cn:"身边的植物",color:"#F8D044",emoji:"🌱",words:[
+{en:"apple",phon:"/ˈæp(ə)l/",cn:"苹果",emoji:"🍎"},{en:"banana",phon:"/bəˈnɑːnə/",cn:"香蕉",emoji:"🍌"},{en:"farm",phon:"/fɑːm/",cn:"农场",emoji:"🌾"},{en:"air",phon:"/eə(r)/",cn:"空气",emoji:"💨"},{en:"orange",phon:"/ˈɒrɪndʒ/",cn:"橙子",emoji:"🍊"},{en:"grape",phon:"/ɡreɪp/",cn:"葡萄",emoji:"🍇"},{en:"school",phon:"/skuːl/",cn:"学校",emoji:"🏫"},{en:"garden",phon:"/ˈɡɑːd(ə)n/",cn:"花园",emoji:"🌻"},{en:"water",phon:"/ˈwɔːtə(r)/",cn:"水",emoji:"💧"},{en:"flower",phon:"/ˈflaʊə(r)/",cn:"花",emoji:"🌸"},{en:"grass",phon:"/ɡrɑːs/",cn:"草地",emoji:"🌿"},{en:"plant",phon:"/plɑːnt/",cn:"植物",emoji:"🌱"},{en:"new",phon:"/njuː/",cn:"新的",emoji:"✨"},{en:"tree",phon:"/triː/",cn:"树",emoji:"🌳"},{en:"sun",phon:"/sʌn/",cn:"太阳",emoji:"☀️"}
+]},{unit:5,title:"The colourful world",cn:"五彩缤纷",color:"#5B57EB",emoji:"🎨",words:[
+{en:"colour",phon:"/ˈkʌlə(r)/",cn:"颜色",emoji:"🎨"},{en:"green",phon:"/ɡriːn/",cn:"绿色",emoji:"🟢"},{en:"red",phon:"/red/",cn:"红色",emoji:"🔴"},{en:"blue",phon:"/bluː/",cn:"蓝色",emoji:"🔵"},{en:"purple",phon:"/ˈpɜːp(ə)l/",cn:"紫色",emoji:"🟣"},{en:"brown",phon:"/braʊn/",cn:"棕色",emoji:"🟤"},{en:"bear",phon:"/beə(r)/",cn:"熊",emoji:"🐻"},{en:"yellow",phon:"/ˈjeləʊ/",cn:"黄色",emoji:"🟡"},{en:"duck",phon:"/dʌk/",cn:"鸭",emoji:"🦆"},{en:"sea",phon:"/siː/",cn:"海洋",emoji:"🌊"},{en:"pink",phon:"/pɪŋk/",cn:"粉色",emoji:"🩷"},{en:"white",phon:"/waɪt/",cn:"白色",emoji:"⚪"},{en:"black",phon:"/blæk/",cn:"黑色",emoji:"⚫"},{en:"draw",phon:"/drɔː/",cn:"画",emoji:"🖍"},{en:"make",phon:"/meɪk/",cn:"做",emoji:"🔧"}
+]},{unit:6,title:"Useful numbers",cn:"有用的数字",color:"#F8B7B8",emoji:"🔢",words:[
+{en:"one",phon:"/wʌn/",cn:"一",emoji:"1️⃣"},{en:"two",phon:"/tuː/",cn:"二",emoji:"2️⃣"},{en:"three",phon:"/θriː/",cn:"三",emoji:"3️⃣"},{en:"four",phon:"/fɔː(r)/",cn:"四",emoji:"4️⃣"},{en:"five",phon:"/faɪv/",cn:"五",emoji:"5️⃣"},{en:"six",phon:"/sɪks/",cn:"六",emoji:"6️⃣"},{en:"seven",phon:"/ˈsev(ə)n/",cn:"七",emoji:"7️⃣"},{en:"eight",phon:"/eɪt/",cn:"八",emoji:"8️⃣"},{en:"nine",phon:"/naɪn/",cn:"九",emoji:"9️⃣"},{en:"ten",phon:"/ten/",cn:"十",emoji:"🔟"},{en:"old",phon:"/əʊld/",cn:"岁",emoji:"📅"},{en:"year",phon:"/jɪə(r)/",cn:"年",emoji:"📆"},{en:"cut",phon:"/kʌt/",cn:"切",emoji:"🔪"},{en:"eat",phon:"/iːt/",cn:"吃",emoji:"🍽"},{en:"cake",phon:"/keɪk/",cn:"蛋糕",emoji:"🎂"}
+]}]};
+
+const dialogs=[
+{unit:1,cn:"交朋友",color:"#B9FF66",emoji:"👫",
+sceneA:["🧒👦","同学们在教室打招呼"],sceneB:["🤝😊","好朋友分享微笑"],
+talkA:[{role:"Chen Jie",emoji:"👧",text:"Hello! I'm Chen Jie."},{role:"John",emoji:"👦",text:"Hi! My name is John."},{role:"Chen Jie",emoji:"👧",text:"Nice to meet you."},{role:"John",emoji:"👦",text:"Nice to meet you, too."},{role:"Chen Jie",emoji:"👧",text:"Let's be friends!"},{role:"John",emoji:"👦",text:"Yes! We are good friends."}],
+talkB:[{role:"Sarah",emoji:"👧‍🦰",text:"Hello, Mike! Let's play a game!"},{role:"Mike",emoji:"👦",text:"OK! Great idea!"},{role:"Sarah",emoji:"👧‍🦰",text:"I smile and I help."},{role:"Mike",emoji:"👦",text:"I share and I listen."},{role:"Sarah",emoji:"👧‍🦰",text:"We can share!"},{role:"Mike",emoji:"👦",text:"Thank you! You are a good friend."}]},
+{unit:2,cn:"不同的家庭",color:"#5B57EB",emoji:"👨‍👩‍👧‍👦",
+sceneA:["👨‍👩‍👧‍👦","Chen Jie 介绍她的家人"],sceneB:["🏠👵","去 Mike 家做客"],
+talkA:[{role:"Chen Jie",emoji:"👧",text:"Look! This is my family."},{role:"John",emoji:"👦",text:"Wow! Is this your mother?"},{role:"Chen Jie",emoji:"👧",text:"Yes, this is my mum."},{role:"John",emoji:"👦",text:"And this is your father?"},{role:"Chen Jie",emoji:"👧",text:"Yes! And this is my baby brother."},{role:"John",emoji:"👦",text:"You have a big family!"}],
+talkB:[{role:"Sarah",emoji:"👧‍🦰",text:"Is this your sister?"},{role:"Mike",emoji:"👦",text:"Yes, she is my sister."},{role:"Sarah",emoji:"👧‍🦰",text:"She is so cute!"},{role:"Mike",emoji:"👦",text:"Thank you! And this is my grandma."},{role:"Sarah",emoji:"👧‍🦰",text:"Hello, Grandma!"},{role:"Mike",emoji:"👦",text:"We are a happy family!"}]},
+{unit:3,cn:"神奇的动物",color:"#F8B7B8",emoji:"🐘",
+sceneA:["🐼🦒","在动物园看动物"],sceneB:["🐕🐱","聊宠物"],
+talkA:[{role:"Chen Jie",emoji:"👧",text:"Look at the panda!"},{role:"John",emoji:"👦",text:"It's so cute! I like it."},{role:"Chen Jie",emoji:"👧",text:"Do you like the tiger?"},{role:"John",emoji:"👦",text:"Yes! The tiger is big and fast."},{role:"Chen Jie",emoji:"👧",text:"What about the giraffe?"},{role:"John",emoji:"👦",text:"It's so tall! I love animals!"}],
+talkB:[{role:"Sarah",emoji:"👧‍🦰",text:"What's your pet?"},{role:"Mike",emoji:"👦",text:"I have a dog. It can run fast."},{role:"Sarah",emoji:"👧‍🦰",text:"I have a cat! It's very cute."},{role:"Mike",emoji:"👦",text:"Do you have a fish?"},{role:"Sarah",emoji:"👧‍🦰",text:"No, but I have a rabbit!"},{role:"Mike",emoji:"👦",text:"Wow! Animals are amazing!"}]},
+{unit:4,cn:"身边的植物",color:"#F8D044",emoji:"🌱",
+sceneA:["🌳🍎","校园里的果树"],sceneB:["🌻🏡","Mike 的花园"],
+talkA:[{role:"Chen Jie",emoji:"👧",text:"We need plants and water."},{role:"John",emoji:"👦",text:"Yes! The apple is on the tree."},{role:"Chen Jie",emoji:"👧",text:"I like apples. Do you?"},{role:"John",emoji:"👦",text:"Yes! And I like bananas too."},{role:"Chen Jie",emoji:"👧",text:"The sun gives us light."},{role:"John",emoji:"👦",text:"We give water to the plant!"}],
+talkB:[{role:"Sarah",emoji:"👧‍🦰",text:"What is in your garden?"},{role:"Mike",emoji:"👦",text:"There are flowers and grass."},{role:"Sarah",emoji:"👧‍🦰",text:"The flowers are beautiful!"},{role:"Mike",emoji:"👦",text:"Thank you! I planted them."},{role:"Sarah",emoji:"👧‍🦰",text:"Can I see the tree?"},{role:"Mike",emoji:"👦",text:"Yes! It is a new tree."}]},
+{unit:5,cn:"五彩缤纷",color:"#5B57EB",emoji:"🎨",
+sceneA:["🌈🎨","一起画彩虹"],sceneB:["🐻🦆","在公园看风景"],
+talkA:[{role:"Chen Jie",emoji:"👧",text:"What colour do you like?"},{role:"John",emoji:"👦",text:"I like blue and green."},{role:"Chen Jie",emoji:"👧",text:"I like red and yellow."},{role:"John",emoji:"👦",text:"We can draw a rainbow!"},{role:"Chen Jie",emoji:"👧",text:"Red, orange, yellow, green..."},{role:"John",emoji:"👦",text:"Blue and purple! Beautiful!"}],
+talkB:[{role:"Sarah",emoji:"👧‍🦰",text:"Look! A brown bear!"},{role:"Mike",emoji:"👦",text:"And a yellow duck!"},{role:"Sarah",emoji:"👧‍🦰",text:"The sea is blue."},{role:"Mike",emoji:"👦",text:"I can make the world colourful!"},{role:"Sarah",emoji:"👧‍🦰",text:"I like pink and white."},{role:"Mike",emoji:"👦",text:"Black and white are colours too!"}]},
+{unit:6,cn:"有用的数字",color:"#F8B7B8",emoji:"🔢",
+sceneA:["🔢🧒","互相问年龄"],sceneB:["🎂🎉","生日派对分蛋糕"],
+talkA:[{role:"Chen Jie",emoji:"👧",text:"How old are you?"},{role:"John",emoji:"👦",text:"I'm five years old."},{role:"Chen Jie",emoji:"👧",text:"I'm six! I can count."},{role:"John",emoji:"👦",text:"One, two, three, four, five!"},{role:"Chen Jie",emoji:"👧",text:"Can you count to ten?"},{role:"John",emoji:"👦",text:"Yes! Six, seven, eight, nine, ten!"}],
+talkB:[{role:"Sarah",emoji:"👧‍🦰",text:"Let's eat the cake!"},{role:"Mike",emoji:"👦",text:"OK! Cut the cake into pieces."},{role:"Sarah",emoji:"👧‍🦰",text:"One, two, three pieces!"},{role:"Mike",emoji:"👦",text:"Four, five, six pieces!"},{role:"Sarah",emoji:"👧‍🦰",text:"We share the cake."},{role:"Mike",emoji:"👦",text:"Yummy! Happy birthday!"}]}
+];
+
+const phonicsData={1:[
+{letter:"Aa",sound:"/æ/",emoji:"🍎",pron:"a",words:["apple","ant","alligator","angry"]},{letter:"Bb",sound:"/b/",emoji:"🐻",pron:"buh",words:["bear","bird","bed","banana"]},{letter:"Cc",sound:"/k/",emoji:"🐱",pron:"kuh",words:["cat","cup","car","computer"]},{letter:"Dd",sound:"/d/",emoji:"🐕",pron:"duh",words:["dog","duck","desk","doll"]},{letter:"Ee",sound:"/e/",emoji:"🥚",pron:"eh",words:["egg","elephant","elbow","envelope"]},{letter:"Ff",sound:"/f/",emoji:"🐟",pron:"fff",words:["fish","frog","fan","fork"]},{letter:"Gg",sound:"/g/",emoji:"🐐",pron:"guh",words:["goat","girl","guitar","gorilla"]},{letter:"Hh",sound:"/h/",emoji:"🎩",pron:"huh",words:["hat","horse","house","hot"]},{letter:"Ii",sound:"/ɪ/",emoji:"🦎",pron:"ih",words:["igloo","iguana","ink","insect"]},{letter:"Jj",sound:"/dʒ/",emoji:"✈️",pron:"juh",words:["jet","jam","juice","jacket"]},{letter:"Kk",sound:"/k/",emoji:"🦘",pron:"kuh",words:["king","kite","kangaroo","key"]},{letter:"Ll",sound:"/l/",emoji:"🦁",pron:"lll",words:["lion","lamp","lemon","leaf"]},{letter:"Mm",sound:"/m/",emoji:"🐵",pron:"mmm",words:["monkey","mouse","milk","moon"]},{letter:"Nn",sound:"/n/",emoji:"🥜",pron:"nnn",words:["nut","nest","nose","nurse"]},{letter:"Oo",sound:"/ɒ/",emoji:"🐙",pron:"aw",words:["octopus","ox","olive","ostrich"]},{letter:"Pp",sound:"/p/",emoji:"🍑",pron:"puh",words:["peach","pen","panda","pineapple"]},{letter:"Qq",sound:"/kw/",emoji:"👑",pron:"kwuh",words:["queen","quilt","question","quiet"]},{letter:"Rr",sound:"/r/",emoji:"🐰",pron:"rrr",words:["rabbit","rose","rain","rice"]},{letter:"Ss",sound:"/s/",emoji:"☀️",pron:"sss",words:["sun","snake","seal","socks"]},{letter:"Tt",sound:"/t/",emoji:"🐢",pron:"tuh",words:["turtle","tiger","tea","tent"]},{letter:"Uu",sound:"/ʌ/",emoji:"☂️",pron:"uh",words:["umbrella","up","uncle","umpire"]},{letter:"Vv",sound:"/v/",emoji:"🚐",pron:"vvv",words:["van","vest","violin","volcano"]},{letter:"Ww",sound:"/w/",emoji:"⌚",pron:"wuh",words:["watch","water","wolf","window"]},{letter:"Xx",sound:"/ks/",emoji:"📦",pron:"ks",words:["fox","box","six","wax"]},{letter:"Yy",sound:"/j/",emoji:"🪀",pron:"yuh",words:["yo-yo","yak","yogurt","yellow"]},{letter:"Zz",sound:"/z/",emoji:"🦓",pron:"zzz",words:["zebra","zero","zoo","zipper"]}],
+2:[{letter:"am",sound:"/æm/",emoji:"🍖",pron:"am",words:["ham","jam","ram","dam"]},{letter:"an",sound:"/æn/",emoji:"🪭",pron:"an",words:["man","fan","can","pan"]},{letter:"at",sound:"/æt/",emoji:"🎩",pron:"at",words:["cat","hat","bat","rat"]},{letter:"ap",sound:"/æp/",emoji:"🗺",pron:"ap",words:["map","cap","nap","tap"]},{letter:"en",sound:"/en/",emoji:"✏️",pron:"en",words:["pen","hen","ten","men"]},{letter:"et",sound:"/et/",emoji:"🐶",pron:"et",words:["pet","net","jet","wet"]},{letter:"ig",sound:"/ɪg/",emoji:"🐖",pron:"ig",words:["pig","big","dig","wig"]},{letter:"in",sound:"/ɪn/",emoji:"🦈",pron:"in",words:["pin","win","fin","bin"]},{letter:"ip",sound:"/ɪp/",emoji:"💧",pron:"ip",words:["lip","sip","tip","dip"]},{letter:"op",sound:"/ɒp/",emoji:"🧹",pron:"op",words:["hop","top","pop","mop"]},{letter:"ot",sound:"/ɒt/",emoji:"🍲",pron:"ot",words:["hot","pot","dot","not"]},{letter:"ug",sound:"/ʌg/",emoji:"🐛",pron:"ug",words:["bug","rug","hug","mug"]},{letter:"un",sound:"/ʌn/",emoji:"☀️",pron:"un",words:["sun","fun","run","bun"]},{letter:"ut",sound:"/ʌt/",emoji:"🥜",pron:"ut",words:["nut","cut","hut","but"]}],
+3:[{letter:"a_e",sound:"/eɪ/",emoji:"🎂",pron:"ay",words:["cake","lake","make","bake"]},{letter:"i_e",sound:"/aɪ/",emoji:"🪁",pron:"eye",words:["kite","bike","like","hike"]},{letter:"o_e",sound:"/əʊ/",emoji:"🌹",pron:"oh",words:["rose","nose","home","rope"]},{letter:"u_e",sound:"/juː/",emoji:"🎵",pron:"you",words:["cute","mule","tube","cube"]},{letter:"ee",sound:"/iː/",emoji:"🐝",pron:"ee",words:["bee","see","tree","feet"]},{letter:"ea",sound:"/iː/",emoji:"🍖",pron:"ee",words:["meat","seat","eat","bean"]},{letter:"ai",sound:"/eɪ/",emoji:"🌧",pron:"ay",words:["rain","pain","mail","tail"]},{letter:"ay",sound:"/eɪ/",emoji:"🌞",pron:"ay",words:["day","play","say","way"]},{letter:"oa",sound:"/əʊ/",emoji:"🐐",pron:"oh",words:["boat","coat","goat","road"]},{letter:"ow",sound:"/aʊ/",emoji:"🐄",pron:"ow",words:["cow","how","now","down"]}]
+};
+
+const stories=[
+{title:"The Big Cat",cn:"大猫",cover:"🐱",pages:[{img:"🐱",en:"The big cat.",cn:"大猫。"},{img:"🐱💨",en:"The big cat jumps.",cn:"大猫跳跃。"},{img:"🐱🏃",en:"The big cat runs.",cn:"大猫奔跑。"},{img:"🐱🍽",en:"The big cat eats.",cn:"大猫吃东西。"},{img:"🐱💧",en:"The big cat drinks.",cn:"大猫喝水。"},{img:"🐱😴",en:"The big cat sleeps.",cn:"大猫睡觉。"}]},
+{title:"Baby Animals",cn:"动物宝宝",cover:"🐣",pages:[{img:"🐕",en:"The baby dog.",cn:"狗宝宝。"},{img:"🐱",en:"The baby cat.",cn:"猫宝宝。"},{img:"🦆",en:"The baby duck.",cn:"鸭宝宝。"},{img:"🐦",en:"The baby bird.",cn:"鸟宝宝。"},{img:"🐰",en:"The baby rabbit.",cn:"兔宝宝。"},{img:"❤️",en:"I see baby animals!",cn:"我看到动物宝宝啦！"}]},
+{title:"All Kinds of Faces",cn:"各种各样的脸",cover:"😊",pages:[{img:"😊",en:"A happy face.",cn:"开心的脸。"},{img:"😢",en:"A sad face.",cn:"难过的脸。"},{img:"😜",en:"A funny face.",cn:"搞怪的脸。"},{img:"😴",en:"A sleepy face.",cn:"困倦的脸。"},{img:"😲",en:"A surprised face.",cn:"惊讶的脸。"},{img:"😄",en:"I can make all kinds of faces!",cn:"我能做各种各样的表情！"}]},
+{title:"Going Places",cn:"去各处",cover:"🚗",pages:[{img:"🏫",en:"I go to school.",cn:"我去学校。"},{img:"🌳",en:"I go to the park.",cn:"我去公园。"},{img:"🏪",en:"I go to the store.",cn:"我去商店。"},{img:"🏛",en:"I go to the zoo.",cn:"我去动物园。"},{img:"🌾",en:"I go to the farm.",cn:"我去农场。"},{img:"🏠",en:"I go home.",cn:"我回家。"}]},
+{title:"My Dog",cn:"我的狗",cover:"🐕",pages:[{img:"🐕",en:"My dog is big.",cn:"我的狗很大。"},{img:"🐕🏃",en:"My dog can run.",cn:"我的狗会跑。"},{img:"🐕⬆️",en:"My dog can jump.",cn:"我的狗会跳。"},{img:"🐕🎾",en:"My dog can play.",cn:"我的狗会玩。"},{img:"❤️🐕",en:"I like my dog.",cn:"我喜欢我的狗。"},{img:"🐕👦",en:"My dog is my best friend.",cn:"狗是我最好的朋友。"}]},
+{title:"Bird Colors",cn:"小鸟的颜色",cover:"🐦",pages:[{img:"🐦🔴",en:"A red bird.",cn:"红色的鸟。"},{img:"🐦🔵",en:"A blue bird.",cn:"蓝色的鸟。"},{img:"🐦🟢",en:"A green bird.",cn:"绿色的鸟。"},{img:"🐦🟡",en:"A yellow bird.",cn:"黄色的鸟。"},{img:"🐦🟣",en:"A purple bird.",cn:"紫色的鸟。"},{img:"🌈",en:"The birds are beautiful!",cn:"小鸟们真漂亮！"}]},
+{title:"He Runs",cn:"他奔跑",cover:"🏃",pages:[{img:"🏃💨",en:"He runs fast.",cn:"他跑得快。"},{img:"🏃🌳",en:"He runs to the tree.",cn:"他跑到树下。"},{img:"🏃💧",en:"He runs to the water.",cn:"他跑到水边。"},{img:"🏃⛰",en:"He runs to the hill.",cn:"他跑到小山。"},{img:"🏃🛑",en:"He stops to rest.",cn:"他停下来休息。"},{img:"🏃✨",en:"Then he runs again!",cn:"然后他又跑起来了！"}]},
+{title:"Bedtime Counting",cn:"睡前数一数",cover:"🌟",pages:[{img:"⭐",en:"One star.",cn:"一颗星星。"},{img:"⭐⭐",en:"Two stars.",cn:"两颗星星。"},{img:"⭐⭐⭐",en:"Three stars.",cn:"三颗星星。"},{img:"⭐⭐⭐⭐",en:"Four stars.",cn:"四颗星星。"},{img:"⭐⭐⭐⭐⭐",en:"Five stars.",cn:"五颗星星。"},{img:"😴",en:"Good night, stars!",cn:"晚安，星星们！"}]}
+];
+
+// ============ HELPERS ============
+const $=q=>document.querySelector(q),$$=q=>document.querySelectorAll(q);
+function showScreen(name,dir='right'){$$('.screen').forEach(e=>e.classList.add(dir==='right'?'hr':'hl'));const t=$('#screen-'+name);if(t){t.classList.remove('hr','hl');t.scrollTop=0}}
+function toast(m,d=1500){const t=$('#toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
+
+// ====== 优化童声语音引擎 ======
+let bestVoice=null;
+const voicePrefs=['Google UK English Female','Microsoft Zira Desktop','Microsoft Zira','Samantha','Karen','Moira','Fiona','Google US English','en-US-Neural2-F'];
+function loadVoices(){
+  const voices=speechSynthesis.getVoices();
+  if(!voices.length)return;
+  for(const pref of voicePrefs){
+    const v=voices.find(x=>x.name===pref||x.name.includes(pref));
+    if(v&&v.lang.startsWith('en')){bestVoice=v;break}
+  }
+  if(!bestVoice) bestVoice=voices.find(v=>v.lang.startsWith('en')&&v.name.includes('Female'))||voices.find(v=>v.lang.startsWith('en'));
+}
+loadVoices();
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged=loadVoices;
+
+function speak(text,opts={}){
+  if(!('speechSynthesis' in window))return;
+  window.speechSynthesis.cancel();
+  if(!bestVoice||!bestVoice.localService) loadVoices();
+  const u=new SpeechSynthesisUtterance(text);
+  u.voice=bestVoice;u.lang='en-US';
+  u.rate=opts.rate||0.72;
+  u.pitch=opts.pitch||1.15;
+  u.volume=1;
+  if(opts.wordMode){u.rate=0.6;u.pitch=1.2}
+  if(opts.storyMode){u.rate=0.75;u.pitch=1.1}
+  speechSynthesis.speak(u);return u;
+}
+
+// ============ STATE ============
+const st={
+screen:'home',words:[],wi:0,correct:[],wrong:[],favs:JSON.parse(localStorage.getItem('fav')||'[]'),
+streak:parseInt(localStorage.getItem('streak')||'0'),checkins:JSON.parse(localStorage.getItem('ci')||'{}'),
+start:0,pi:0,pl:'1',dialogMsgs:[],dialogIdx:0,dialogTotal:0,dialogUnit:0,
+storyIdx:0,storyPage:0,resultType:''
+};
+
+function updateStreak(){
+const now=new Date().toDateString(),y=new Date();y.setDate(y.getDate()-1);
+const sd=localStorage.getItem('sd')||'';
+if(sd===now){}else if(sd===y.toDateString()){st.streak++;localStorage.setItem('streak',st.streak);localStorage.setItem('sd',now)}
+else{st.streak=1;localStorage.setItem('streak',1);localStorage.setItem('sd',now)}
+$('#streak-title').textContent='连续打卡 '+(st.streak||0)+' 天';
+const c=Object.values(st.checkins).filter(v=>v).length;
+$('#streak-sub').textContent=c>=4?'🎉 今日全部完成！':'完成今日4项打卡领取⭐';
+}
+function updateHome(){updateStreak();const c=Object.values(st.checkins).filter(v=>v).length;$('#goal-count').textContent=c+' / 4';$('#goal-progress').style.width=(c/4*100)+'%'}
+function checkIn(type){st.checkins[type]=true;localStorage.setItem('ci',JSON.stringify(st.checkins))}
+
+// Tab
+$$('.ti').forEach((b,i)=>{b.onclick=()=>{$$('.ti').forEach(x=>x.classList.remove('ac'));b.classList.add('ac');i===0?(showScreen('home','left'),updateHome()):toast('开发中...')}});
+
+// ============ WORD ============
+function showWordUnits(){
+showScreen('word-select','right');
+$('#word-unit-list').innerHTML=vocab.units.map(u=>`
+<button class="sel-item" data-uid="${u.unit}">
+<div class="sel-icon" style="background:${u.color}">${u.emoji}</div>
+<div class="sel-info"><div class="sel-name">Unit ${u.unit} · ${u.cn}</div><div class="sel-desc">${u.title} · ${u.words.length} 个单词</div></div>
+<div class="sel-arrow">→</div></button>`).join('');
+$$('#word-unit-list .sel-item').forEach(b=>b.onclick=()=>startWord(parseInt(b.dataset.uid)))}
+$('#ws-back').onclick=()=>{showScreen('home','left');updateHome()};
+
+function startWord(uid){
+const u=vocab.units.find(x=>x.unit===uid);if(!u)return;
+st.words=u.words.map(w=>({...w,unit:uid}));st.wi=0;st.correct=[];st.wrong=[];st.start=Date.now();st.resultType='word';
+showScreen('word','right');$('#w-title').textContent='Unit '+uid+' · '+u.cn;renderWord()}
+function renderWord(){
+const w=st.words[st.wi];if(!w)return finishResults();
+$('#w-emoji').textContent=w.emoji||'📖';$('#w-big').textContent=w.en;$('#w-cn').textContent=w.cn;
+$('#w-phon-text').textContent=w.phon;$('#w-progress').textContent='第 '+(st.wi+1)+' 个 / 共 '+st.words.length+' 个';
+const pct=Math.round(st.wi/st.words.length*100);$('#w-percent').textContent=pct+'%';$('#w-bar').style.width=pct+'%';
+$('#w-fav').classList.toggle('fvd',st.favs.includes(w.en));$('#w-spell-input').value='';$('#w-spell-input').className='spell-input';$('#w-spell-result').textContent=''}
+function markWord(r){const w=st.words[st.wi];if(r==='correct')st.correct.push(w);else st.wrong.push(w);st.wi++;st.wi>=st.words.length?finishResults():renderWord()}
+$('#w-known').onclick=()=>markWord('correct');$('#w-unknown').onclick=()=>markWord('wrong');
+$('#w-fav').onclick=()=>{const w=st.words[st.wi];if(!w)return;const i=st.favs.indexOf(w.en);i>=0?st.favs.splice(i,1):st.favs.push(w.en);localStorage.setItem('fav',JSON.stringify(st.favs));$('#w-fav').classList.toggle('fvd',st.favs.includes(w.en));toast(st.favs.includes(w.en)?'已收藏':'已取消')};
+$('#w-phon').onclick=()=>{const w=st.words[st.wi];if(w)speak(w.en,{wordMode:true})};
+$('#w-spell-check').onclick=()=>{const w=st.words[st.wi];if(!w)return;const inp=$('#w-spell-input').value.trim().toLowerCase();inp===w.en.toLowerCase()?($('#w-spell-input').className='spell-input ok',$('#w-spell-result').innerHTML='✅ <span style="color:#B9FF66">正确！</span>',setTimeout(()=>markWord('correct'),800)):($('#w-spell-input').className='spell-input err',$('#w-spell-result').innerHTML='❌ <span style="color:#FF6B6B">答案：'+w.en+'</span>')};
+$('#w-show-answer').onclick=()=>{const w=st.words[st.wi];if(w){$('#w-spell-input').value=w.en;$('#w-spell-result').innerHTML='<span style="color:#5B57EB">答案已显示：'+w.en+'</span>'}};
+$('#w-back').onclick=()=>showWordUnits();
+$('#w-close').onclick=()=>showWordUnits();
+
+// ============ READING ============
+function showReadingUnits(){
+showScreen('reading-select','right');
+$('#reading-unit-list').innerHTML=dialogs.map(d=>`
+<button class="sel-item" data-ruid="${d.unit}">
+<div class="sel-icon" style="background:${d.color}">${d.emoji}</div>
+<div class="sel-info"><div class="sel-name">Unit ${d.unit} · ${d.cn}</div><div class="sel-desc">Let's talk A + B · 12句对话</div></div>
+<div class="sel-arrow">→</div></button>`).join('');
+$$('#reading-unit-list .sel-item').forEach(b=>b.onclick=()=>startReading(parseInt(b.dataset.ruid)))}
+$('#rs-back').onclick=()=>{showScreen('home','left');updateHome()};
+
+function startReading(uid){
+const d=dialogs.find(x=>x.unit===uid);if(!d)return;
+st.dialogMsgs=[...d.talkA.map(m=>({...m,part:'A'})),...d.talkB.map(m=>({...m,part:'B'}))];
+st.dialogIdx=0;st.dialogTotal=st.dialogMsgs.length;st.dialogUnit=uid;st.start=Date.now();st.resultType='reading';
+showScreen('reading','right');$('#r-title').textContent='Unit '+uid+' · '+d.cn;$('#dialog-area').innerHTML='';
+// Set scene image
+if(d.sceneA){$('#reading-scene').innerHTML='<div class="rs-emoji">'+d.sceneA[0]+'</div><div class="rs-label">Let\'s talk A · '+d.sceneA[1]+'</div>'}
+$('#r-progress').textContent='Let\'s talk A & B · 对话练习';$('#r-percent').textContent='0%';$('#r-bar').style.width='0%';
+showNextDialogMsg()}
+function showNextDialogMsg(){
+if(st.dialogIdx>=st.dialogTotal){checkIn('reading');finishResults();return}
+const m=st.dialogMsgs[st.dialogIdx];const side=m.part==='A'?'left':'right';
+// Switch scene when entering Let's talk B
+const d2=dialogs.find(x=>x.unit===st.dialogUnit);
+if(m.part==='B'&&st.dialogIdx===st.dialogMsgs.filter(x=>x.part==='A').length){
+if(d2?.sceneB){$('#reading-scene').innerHTML='<div class="rs-emoji">'+d2.sceneB[0]+'</div><div class="rs-label">Let\'s talk B · '+d2.sceneB[1]+'</div>'}
+}
+const cls=side==='left'?'dmsg-a':'dmsg-b';const nm=side==='left'?m.role:'';$('#dialog-area').innerHTML+=`
+<div class="dmsg-role" style="justify-content:${side==='left'?'flex-start':'flex-end'}">
+${side==='left'?'<div class="dmsg-emoji">'+m.emoji+'</div>':''}
+<div class="dialog-msg dmsg-${side} ${cls}">
+${nm?'<div class="dmsg-name">'+nm+'</div>':''}
+<div>${m.text}</div></div>
+${side==='right'?'<div class="dmsg-emoji">'+m.emoji+'</div>':''}</div>`;
+$('#dialog-area').scrollTop=$('#dialog-area').scrollHeight;
+st.dialogIdx++;const pct=Math.round(st.dialogIdx/st.dialogTotal*100);
+$('#r-percent').textContent=pct+'%';$('#r-bar').style.width=pct+'%';
+if(st.dialogIdx>=st.dialogTotal){$('#r-next-msg').textContent='✅ 完成打卡';speak('Good job!')}
+if(st.dialogMsgs[st.dialogIdx-1]){const last=st.dialogMsgs[st.dialogIdx-1];setTimeout(()=>speak(last.text),300)}
+}
+$('#r-next-msg').onclick=()=>showNextDialogMsg();
+$('#r-back').onclick=()=>showReadingUnits();
+$('#r-close').onclick=()=>showReadingUnits();
+
+// ============ PHONICS ============
+$$('.pls-btn').forEach(b=>b.onclick=function(){
+$$('.pls-btn').forEach(x=>x.classList.remove('active'));this.classList.add('active');
+st.pl=this.dataset.pl;st.pi=0;renderPhonics()});
+
+function startPhonics(){st.pi=0;st.pl='1';st.start=Date.now();st.resultType='phonics';showScreen('phonics','right');renderPhonics()}
+function renderPhonics(){
+const data=phonicsData[st.pl]||phonicsData['1'];const item=data[st.pi];if(!item)return finishResults();
+$('#p-letter').textContent=item.letter;$('#p-sound').textContent=item.sound;
+// Click letter: reads the phonics sound (not the word)
+$('#p-letter').onclick=()=>{speak(item.pron,{wordMode:true,rate:0.5,pitch:1.15})};
+$('#p-sound').onclick=()=>{speak(item.pron,{wordMode:true,rate:0.45,pitch:1.15})};
+$('#p-hint').textContent='👆 点击字母听发音 · 点击音标重复播放';
+$('#p-words').innerHTML=item.words.map(w=>`
+<button class="phonics-word" data-w="${w}"><span class="pw-emoji">🔊</span><span class="pw-text">${w}</span></button>`).join('');
+$$('#p-words .phonics-word').forEach(b=>b.onclick=function(e){e.stopPropagation();speak(this.dataset.w,{wordMode:true})});
+$('#p-progress').textContent='第 '+(st.pi+1)+' 个 / 共 '+data.length+' 个';
+const pct=Math.round(st.pi/data.length*100);$('#p-percent').textContent=pct+'%';$('#p-bar').style.width=pct+'%';
+// Practice question (every 5th)
+if((st.pi+1)%5===0){showPhonicsPractice(item)}else{$('#pq-box').style.display='none'}
+}
+function showPhonicsPractice(item){
+const wrong=phonicsData[st.pl].filter(x=>x.letter!==item.letter).sort(()=>Math.random()-.5).slice(0,2);
+const options=[item,...wrong].sort(()=>Math.random()-.5);
+$('#pq-box').style.display='block';
+$('#pq-box').innerHTML='<div style="font-size:13px;font-weight:600;margin-bottom:8px">🎯 听发音，选择正确的字母组合</div><div style="margin-bottom:8px;cursor:pointer;font-size:20px" onclick="speak(\''+item.words[0]+'\',{wordMode:true})">🔊 点击听音</div><div class="pq-grid">'+options.map(o=>`
+<button class="pq-opt" data-ans="${o.letter===item.letter}">${o.letter}<br><span style="font-size:11px">${o.words[0]}</span></button>`).join('')+'</div>';
+$$('#pq-box .pq-opt').forEach(b=>b.onclick=function(){
+const correct=this.dataset.ans==='true';this.classList.add(correct?'correct':'wrong');
+$$('#pq-box .pq-opt').forEach(x=>{if(x.dataset.ans==='true')x.classList.add('correct')});
+setTimeout(()=>{$('#pq-box').style.display='none';st.correct.push(item);st.pi++;renderPhonics()},600)
+})}
+$('#p-next').onclick=()=>{st.correct.push(phonicsData[st.pl][st.pi]);st.pi++;renderPhonics()};
+$('#p-prev').onclick=()=>{if(st.pi>0){st.pi--;st.correct.pop();renderPhonics()}};
+$('#p-back').onclick=()=>{showScreen('home','left');updateHome()};
+$('#p-close').onclick=()=>$('#p-back').onclick();
+
+// ============ STORY ============
+function startStory(){showScreen('story','right');renderStoryList()}
+function renderStoryList(){
+$('#story-list-s').innerHTML=stories.map((s,i)=>`
+<button class="story-card2" data-si="${i}">
+<div class="story-cover" style="background:${['#B9FF66','#5B57EB','#F8B7B8','#F8D044','#FF6B6B','#87CEEB','#DDA0DD','#98FB98'][i]}">${s.cover}</div>
+<div class="story-meta"><div class="smt">${s.title}</div><div class="smd">${s.cn} · RAZ Level A · ${s.pages.length}页</div><div style="font-size:11px;color:#5B57EB;margin-top:2px">点击开始绘本阅读 →</div></div></button>`).join('');
+$$('#story-list-s .story-card2').forEach(b=>b.onclick=()=>{st.storyIdx=parseInt(b.dataset.si);st.storyPage=0;st.resultType='story';showScreen('story-reader','right');renderStoryPage()})}
+function renderStoryPage(){
+const s=stories[st.storyIdx];if(st.storyPage>=s.pages.length){checkIn('story');finishResults();return}
+const p=s.pages[st.storyPage];$('#sr-title').textContent=s.title;$('#sp-img').textContent=p.img;
+$('#sp-sentence').textContent=p.en;$('#sp-sentence').className='sp-sentence';
+$('#sp-cn').textContent=p.cn;
+$('#sp-page-num').textContent=(st.storyPage+1)+'/'+s.pages.length;
+$('#sp-status').textContent='';
+$('#sp-readalong').innerHTML='🔊 跟读模式';$('#sp-readalong').className='story-read-btn';
+$('#sp-autoplay').className='story-auto-btn'}
+
+// Readalong: reads current sentence, waits, prompts child
+let readalongTimer=null;
+function doReadalong(){
+if(readalongTimer){clearTimeout(readalongTimer);readalongTimer=null}
+const s=stories[st.storyIdx];if(!s)return;
+const p=s.pages[st.storyPage];if(!p)return;
+$('#sp-readalong').innerHTML='🔊 正在朗读...';$('#sp-readalong').className='story-read-btn playing';
+$('#sp-sentence').className='sp-sentence reading';
+$('#sp-status').textContent='👂 仔细听...';
+speak(p.en,{storyMode:true});
+const dur=Math.max(p.en.split(' ').length*800,2000);
+readalongTimer=setTimeout(()=>{
+$('#sp-readalong').innerHTML='🎤 请跟读！';$('#sp-readalong').className='story-read-btn playing';
+$('#sp-status').textContent='🎤 现在请跟读一遍';
+setTimeout(()=>{
+$('#sp-readalong').innerHTML='🔊 跟读模式';$('#sp-readalong').className='story-read-btn';
+$('#sp-sentence').className='sp-sentence listened';
+$('#sp-status').textContent='✅ 太棒了！点击句子可再听';
+readalongTimer=null},dur)
+},dur)}
+
+// Auto play through all pages
+let autoTimer=null;
+function startAutoPlay(){
+if(autoTimer){stopAutoPlay();return}
+$('#sp-autoplay').innerHTML='⏸ 停止播放';$('#sp-autoplay').className='story-auto-btn active';
+function playPage(){
+const s=stories[st.storyIdx];const p=s.pages[st.storyPage];
+if(!p||st.storyPage>=s.pages.length){stopAutoPlay();return}
+$('#sp-sentence').className='sp-sentence reading';
+$('#sp-readalong').innerHTML='🔊 播放中...';$('#sp-readalong').className='story-read-btn playing';
+$('#sp-status').textContent='👂 '+(st.storyPage+1)+'/'+s.pages.length;
+speak(p.en,{storyMode:true});
+const dur=Math.max(p.en.split(' ').length*900,2500);
+autoTimer=setTimeout(()=>{
+$('#sp-sentence').className='sp-sentence listened';
+st.storyPage++;
+if(st.storyPage>=s.pages.length){stopAutoPlay();checkIn('story');finishResults();return}
+renderStoryPageQuick();
+autoTimer=setTimeout(()=>playPage(),600)},dur)}
+playPage()}
+function stopAutoPlay(){
+if(autoTimer){clearTimeout(autoTimer);autoTimer=null}
+$('#sp-autoplay').innerHTML='▶ 自动播放';$('#sp-autoplay').className='story-auto-btn';
+$('#sp-readalong').innerHTML='🔊 跟读模式';$('#sp-readalong').className='story-read-btn';
+$('#sp-status').textContent=''}
+function renderStoryPageQuick(){
+const s=stories[st.storyIdx];const p=s.pages[st.storyPage];if(!p)return;
+$('#sr-title').textContent=s.title;$('#sp-img').textContent=p.img;
+$('#sp-sentence').textContent=p.en;$('#sp-sentence').className='sp-sentence';
+$('#sp-cn').textContent=p.cn;$('#sp-page-num').textContent=(st.storyPage+1)+'/'+s.pages.length}
+
+$('#sp-readalong').onclick=()=>doReadalong();
+$('#sp-autoplay').onclick=()=>startAutoPlay();
+$('#sp-sentence').onclick=()=>{
+const s=stories[st.storyIdx];if(s&&s.pages[st.storyPage]){speak(s.pages[st.storyPage].en,{storyMode:true});
+$('#sp-sentence').className='sp-sentence reading';$('#sp-status').textContent='🔊 正在朗读...';
+setTimeout(()=>{$('#sp-sentence').className='sp-sentence listened';$('#sp-status').textContent='✅ 已朗读 - 点击可再听'},1500)}
+};
+$('#sp-next').onclick=()=>{stopAutoPlay();st.storyPage++;renderStoryPage()};
+$('#sp-prev').onclick=()=>{stopAutoPlay();if(st.storyPage>0){st.storyPage--;renderStoryPage()}};
+$('#sr-back').onclick=()=>{showScreen('story','left')};
+$('#s-back').onclick=()=>{showScreen('home','left');updateHome()};
+
+// ============ RESULTS ============
+function finishResults(){
+checkIn(st.resultType);
+const total=st.resultType==='phonics'?phonicsData[st.pl].length:(st.resultType==='reading'?st.dialogTotal:(st.words.length||1));
+const correct=st.correct.length||total;const wrong=st.wrong.length||0;
+const pct=Math.round(correct/total*100);const elapsed=st.start?Math.round((Date.now()-st.start)/1000):0;
+$('#sr-pct').textContent=pct+'%';$('#sr-ring').style.setProperty('--s',pct+'%');
+$('#sr-correct').textContent=correct;$('#sr-time').textContent=elapsed;$('#sr-streak').textContent=st.streak||1;
+$('#sr-review').textContent=wrong+' 个';
+const wl=$('#sr-wrong');wl.innerHTML='';if(wrong===0){wl.innerHTML='<div style="text-align:center;color:#888;padding:20px;font-size:14px">🎉 全部正确！</div>'}
+else{st.wrong.forEach(w=>{const d=document.createElement('div');d.className='wi2';d.innerHTML='<div class="wd"></div><span style="font-family:Inter Tight,sans-serif;font-size:15px;font-weight:600;color:#1A1A23;flex:1">'+w.en+'</span><span style="font-size:13px;color:#888">'+w.cn+'</span>';d.onclick=()=>toast(w.en+' — '+w.cn);wl.appendChild(d)})}
+showScreen('results','right');updateHome()}
+$('#sr-continue').onclick=()=>{showScreen('home','left');updateHome()};
+$('#sr-retry').onclick=()=>{if(st.wrong.length<1){toast('没有错题！');return}st.words=[...st.wrong];st.wi=0;st.correct=[];st.wrong=[];st.start=Date.now();showScreen('word','left');renderWord()};
+
+// ============ HOME TILES ============
+$$('.mtile').forEach(t=>t.onclick=()=>{
+const g=t.dataset.go;
+if(g==='word')showWordUnits();else if(g==='reading')showReadingUnits();
+else if(g==='phonics')startPhonics();else if(g==='story')startStory()});
+
+// ============ INIT ============
+updateHome();st.start=Date.now();
+console.log('✅ 英语练习小工具 3.0 | 单词+阅读对话+自然拼读+绘本故事');
+</script>
+</body>
+</html>
